@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Webshop.Models
 {
-    internal class Products
+    internal class Product
     {
         public int Id { get; set; }
         [MaxLength(100)]

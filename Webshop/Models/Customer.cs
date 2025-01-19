@@ -24,6 +24,7 @@ namespace Webshop.Models
 
     internal class Address
     {
+        public int Id { get; set; }
         public AddressType Type { get; set; }
         [MaxLength(100)]
         public string? Street { get; set; }
