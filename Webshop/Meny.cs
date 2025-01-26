@@ -165,7 +165,15 @@ namespace Webshop
                 currentOrder.Items?.Add(orderItem);
                 }
             }
-        
+
+        private void ChangeAmountOfProductInCart(int productId, int amount)
+        {
+            var orderItem = currentOrder.Items?.FirstOrDefault(oi => oi.ProductId == productId);
+            if (orderItem != null)
+            {
+                orderItem.Amount = amount;
+            }
+        }
         private void ShowCart()
         {
             while (true)
@@ -251,14 +259,17 @@ namespace Webshop
             Console.Write("Ange fraktmetod (1: Standard, 2: Express): ");
             ShippingMethod shippingMethod = (ShippingMethod)int.Parse(Console.ReadLine());
 
-            Console.Write("Ange fraktpris: ");
-            decimal shippingPrice = decimal.Parse(Console.ReadLine());
+            decimal shippingPrice = shippingMethod == ShippingMethod.Budget ? 0 : 50;
+            
+            decimal totalPrice = shippingPrice;
+            foreach (var item in currentOrder.Items)
+            {
+                var product = dbContext.Products.Find(item.ProductId);
+                totalPrice += product.Price * item.Amount;
+            }
+            decimal vat = totalPrice * 0.25M;
 
-            Console.Write("Ange moms: ");
-            decimal vat = decimal.Parse(Console.ReadLine());
-
-            Console.Write("Ange totalpris: ");
-            decimal totalPrice = decimal.Parse(Console.ReadLine());
+            totalPrice = Math.Round(totalPrice, 2);
 
             var order = CreateOrder(customer.Id, paymentMethod, shippingMethod, shippingPrice, vat, totalPrice);
             ShowOrderDetails(order);
@@ -312,12 +323,6 @@ namespace Webshop
                 TotalPrice = totalPrice,
                 Items = cartItems
             };
-
-            //foreach (var item in cartItems)
-            //{
-            //    item.OrderId = order.Id;
-            //    order.Items.Add(item);
-            //}
 
             dbContext.Orders.Add(order);
             dbContext.SaveChanges();

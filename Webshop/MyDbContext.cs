@@ -21,7 +21,7 @@ namespace Webshop
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Server=tcp:dbpe.database.windows.net,1433;Initial Catalog=WebshopDb;Persist Security Info=False;User ID=pontus;Password=Admin123;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
+            optionsBuilder.UseSqlServer("Server=tcp:dbpe.database.windows.net,1433;Initial Catalog=WebshopDb;Persist Security Info=False;User ID=pontus;Password=;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
