@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,13 @@ namespace Webshop
 {
     internal class ProductManager
     {
+        private MyDbContext dbContext;
+
+        public ProductManager()
+        {
+            dbContext = new MyDbContext();
+        }
+
         public void AddCategory()
         {
             Console.Write("Ange kategorins namn: ");
@@ -16,12 +24,9 @@ namespace Webshop
 
             var category = new Category { Name = name };
 
-            using (var context = new MyDbContext())
-            {
-                context.Categories.Add(category);
-                context.SaveChanges();
-            }
-
+            dbContext.Categories.Add(category);
+            dbContext.SaveChanges();
+           
             Console.WriteLine($"Kategorin '{name}' har lagts till.");
         }
 
@@ -32,21 +37,16 @@ namespace Webshop
 
             var supplier = new Supplier { Name = name };
 
-            using (var context = new MyDbContext())
-            {
-                context.Suppliers.Add(supplier);
-                context.SaveChanges();
-            }
+            dbContext.Suppliers.Add(supplier);
+            dbContext.SaveChanges();
 
             Console.WriteLine($"Leverantören '{name}' har lagts till.");
         }
 
         public void AddProduct()
         {
-            using (var context = new MyDbContext())
-            {
                 Console.WriteLine("Tillgängliga kategorier:");
-                foreach (var category in context.Categories)
+                foreach (var category in dbContext.Categories)
                 {
                     Console.WriteLine($"{category.Id}: {category.Name}");
                 }
@@ -55,7 +55,7 @@ namespace Webshop
                 int categoryId = int.Parse(Console.ReadLine() ?? "0");
 
                 Console.WriteLine("Tillgängliga leverantörer:");
-                foreach (var supplier in context.Suppliers)
+                foreach (var supplier in dbContext.Suppliers)
                 {
                     Console.WriteLine($"{supplier.Id}: {supplier.Name}");
                 }
@@ -93,19 +93,16 @@ namespace Webshop
                     Stock = stock
                 };
 
-                context.Products.Add(product);
-                context.SaveChanges();
-            }
-
+            dbContext.Products.Add(product);
+            dbContext.SaveChanges();
+       
             Console.WriteLine("Produkten har lagts till i databasen.");
         }
 
         public void UpdateProduct()
         {
-            using (var context = new MyDbContext())
-            {
                 Console.WriteLine("Befintliga produkter:");
-                foreach (var product in context.Products)
+                foreach (var product in dbContext.Products)
                 {
                     Console.WriteLine($"{product.Id}: {product.Name} - {product.Price} kr");
                 }
@@ -113,7 +110,7 @@ namespace Webshop
                 Console.Write("Ange ID för produkten du vill ändra: ");
                 int productId = int.Parse(Console.ReadLine() ?? "0");
 
-                var productToUpdate = context.Products.Find(productId);
+                var productToUpdate = dbContext.Products.Find(productId);
                 if (productToUpdate == null)
                 {
                     Console.WriteLine("Produkten med det angivna ID:t hittades inte.");
@@ -158,7 +155,7 @@ namespace Webshop
                 }
 
                 Console.WriteLine("Tillgängliga kategorier:");
-                foreach (var category in context.Categories)
+                foreach (var category in dbContext.Categories)
                 {
                     Console.WriteLine($"{category.Id}: {category.Name}");
                 }
@@ -168,14 +165,14 @@ namespace Webshop
                 if (!string.IsNullOrEmpty(newCategoryIdInput))
                 {
                     int newCategoryId = int.Parse(newCategoryIdInput);
-                    if (context.Categories.Any(c => c.Id == newCategoryId))
+                    if (dbContext.Categories.Any(c => c.Id == newCategoryId))
                     {
                         productToUpdate.CategoryId = newCategoryId;
                     }
                 }
 
                 Console.WriteLine("Tillgängliga leverantörer:");
-                foreach (var supplier in context.Suppliers)
+                foreach (var supplier in dbContext.Suppliers)
                 {
                     Console.WriteLine($"{supplier.Id}: {supplier.Name}");
                 }
@@ -185,23 +182,20 @@ namespace Webshop
                 if (!string.IsNullOrEmpty(newSupplierIdInput))
                 {
                     int newSupplierId = int.Parse(newSupplierIdInput);
-                    if (context.Suppliers.Any(s => s.Id == newSupplierId))
+                    if (dbContext.Suppliers.Any(s => s.Id == newSupplierId))
                     {
                         productToUpdate.SupplierId = newSupplierId;
                     }
                 }
 
-                context.SaveChanges();
+                dbContext.SaveChanges();
                 Console.WriteLine("Produkten har uppdaterats.");
-            }
         }
 
         public void DeleteProduct()
         {
-            using (var context = new MyDbContext())
-            {
                 Console.WriteLine("Befintliga produkter:");
-                foreach (var product in context.Products)
+                foreach (var product in dbContext.Products)
                 {
                     Console.WriteLine($"{product.Id}: {product.Name} - {product.Price} kr");
                 }
@@ -209,25 +203,28 @@ namespace Webshop
                 Console.Write("Ange ID för produkten du vill ta bort: ");
                 int productId = int.Parse(Console.ReadLine() ?? "0");
 
-                var productToDelete = context.Products.Find(productId);
+                var productToDelete = dbContext.Products.Find(productId);
                 if (productToDelete == null)
                 {
                     Console.WriteLine("Produkten med det angivna ID:t hittades inte.");
                     return;
                 }
 
-                context.Products.Remove(productToDelete);
-                context.SaveChanges();
-                Console.WriteLine($"Produkten '{productToDelete.Name}' har tagits bort.");
-            }
+            dbContext.Products.Remove(productToDelete);
+            dbContext.SaveChanges();
+            Console.WriteLine($"Produkten '{productToDelete.Name}' har tagits bort.");
         }
     }
     internal class Admin
     {
+        private MyDbContext dbContext;
+
+        public Admin()
+        {
+            dbContext = new MyDbContext();
+        }
         public void ShowAdminPage()
         {
-            using (var context = new MyDbContext())
-            {
                 while (true)
                 {
                     Console.Clear();
@@ -245,14 +242,14 @@ namespace Webshop
                     var input = Console.ReadLine();
                     if (input == "1")
                     {
-                        ShowAllCustomers(context);
+                        ShowAllCustomers();
                     }
                     else if (input == "2")
                     {
                         Console.Write("Ange kund-ID: ");
                         if (int.TryParse(Console.ReadLine(), out int customerId))
                         {
-                            ShowCustomerOrders(context, customerId);
+                            ShowCustomerOrders(customerId);
                         }
                         else
                         {
@@ -292,11 +289,10 @@ namespace Webshop
                     Console.ReadKey();
                 }
             }
-        }
-
-        private void ShowAllCustomers(MyDbContext context)
+        
+        private void ShowAllCustomers()
         {
-            var customers = context.Customers.ToList();
+            var customers = dbContext.Customers.ToList();
             if (!customers.Any())
             {
                 Console.WriteLine("Inga kunder hittades.");
@@ -310,16 +306,19 @@ namespace Webshop
             }
         }
 
-        private void ShowCustomerOrders(MyDbContext context, int customerId)
+        private void ShowCustomerOrders(int customerId)
         {
-            var customer = context.Customers.FirstOrDefault(c => c.Id == customerId);
+            var customer = dbContext.Customers.FirstOrDefault(c => c.Id == customerId);
             if (customer == null)
             {
                 Console.WriteLine("Kunden hittades inte.");
                 return;
             }
 
-            var orders = context.Orders.Where(o => o.CustomerId == customerId).ToList();
+            var orders = dbContext.Orders
+                .Include(o => o.Items)
+                .Where(o => o.CustomerId == customerId)
+                .ToList();
             if (!orders.Any())
             {
                 Console.WriteLine("Inga orders hittades för denna kund.");
@@ -347,7 +346,7 @@ namespace Webshop
             Console.WriteLine("\nOrderrader:");
             foreach (var item in order.Items)
             {
-                var product = item.Product;
+                var product = dbContext.Products.Find(item.ProductId);
                 Console.WriteLine($"Produkt-ID: {item.ProductId}, Namn: {product?.Name}, Antal: {item.Amount}, Pris: {product?.Price} kr");
             }
         }
@@ -359,11 +358,8 @@ namespace Webshop
 
             var category = new Category { Name = name };
 
-            using (var context = new MyDbContext())
-            {
-                context.Categories.Add(category);
-                context.SaveChanges();
-            }
+            dbContext.Categories.Add(category);
+            dbContext.SaveChanges();
 
             Console.WriteLine($"Kategorin '{name}' har lagts till.");
         }
@@ -375,21 +371,16 @@ namespace Webshop
 
             var supplier = new Supplier { Name = name };
 
-            using (var context = new MyDbContext())
-            {
-                context.Suppliers.Add(supplier);
-                context.SaveChanges();
-            }
-
+            dbContext.Suppliers.Add(supplier);
+            dbContext.SaveChanges();
+      
             Console.WriteLine($"Leverantören '{name}' har lagts till.");
         }
 
         public void AddProduct()
         {
-            using (var context = new MyDbContext())
-            {
                 Console.WriteLine("Tillgängliga kategorier:");
-                foreach (var category in context.Categories)
+                foreach (var category in dbContext.Categories)
                 {
                     Console.WriteLine($"{category.Id}: {category.Name}");
                 }
@@ -398,7 +389,7 @@ namespace Webshop
                 int categoryId = int.Parse(Console.ReadLine() ?? "0");
 
                 Console.WriteLine("Tillgängliga leverantörer:");
-                foreach (var supplier in context.Suppliers)
+                foreach (var supplier in dbContext.Suppliers)
                 {
                     Console.WriteLine($"{supplier.Id}: {supplier.Name}");
                 }
@@ -436,19 +427,16 @@ namespace Webshop
                     Stock = stock
                 };
 
-                context.Products.Add(product);
-                context.SaveChanges();
-            }
-
+            dbContext.Products.Add(product);
+            dbContext.SaveChanges();
+        
             Console.WriteLine("Produkten har lagts till i databasen.");
         }
 
         public void UpdateProduct()
         {
-            using (var context = new MyDbContext())
-            {
                 Console.WriteLine("Befintliga produkter:");
-                foreach (var product in context.Products)
+                foreach (var product in dbContext.Products)
                 {
                     Console.WriteLine($"{product.Id}: {product.Name} - {product.Price} kr");
                 }
@@ -456,7 +444,7 @@ namespace Webshop
                 Console.Write("Ange ID för produkten du vill ändra: ");
                 int productId = int.Parse(Console.ReadLine() ?? "0");
 
-                var productToUpdate = context.Products.Find(productId);
+                var productToUpdate = dbContext.Products.Find(productId);
                 if (productToUpdate == null)
                 {
                     Console.WriteLine("Produkten med det angivna ID:t hittades inte.");
@@ -501,7 +489,7 @@ namespace Webshop
                 }
 
                 Console.WriteLine("Tillgängliga kategorier:");
-                foreach (var category in context.Categories)
+                foreach (var category in dbContext.Categories)
                 {
                     Console.WriteLine($"{category.Id}: {category.Name}");
                 }
@@ -511,14 +499,14 @@ namespace Webshop
                 if (!string.IsNullOrEmpty(newCategoryIdInput))
                 {
                     int newCategoryId = int.Parse(newCategoryIdInput);
-                    if (context.Categories.Any(c => c.Id == newCategoryId))
+                    if (dbContext.Categories.Any(c => c.Id == newCategoryId))
                     {
                         productToUpdate.CategoryId = newCategoryId;
                     }
                 }
 
                 Console.WriteLine("Tillgängliga leverantörer:");
-                foreach (var supplier in context.Suppliers)
+                foreach (var supplier in dbContext.Suppliers)
                 {
                     Console.WriteLine($"{supplier.Id}: {supplier.Name}");
                 }
@@ -528,23 +516,20 @@ namespace Webshop
                 if (!string.IsNullOrEmpty(newSupplierIdInput))
                 {
                     int newSupplierId = int.Parse(newSupplierIdInput);
-                    if (context.Suppliers.Any(s => s.Id == newSupplierId))
+                    if (dbContext.Suppliers.Any(s => s.Id == newSupplierId))
                     {
                         productToUpdate.SupplierId = newSupplierId;
                     }
                 }
 
-                context.SaveChanges();
+                dbContext.SaveChanges();
                 Console.WriteLine("Produkten har uppdaterats.");
             }
-        }
-
+        
         public void DeleteProduct()
         {
-            using (var context = new MyDbContext())
-            {
                 Console.WriteLine("Befintliga produkter:");
-                foreach (var product in context.Products)
+                foreach (var product in dbContext.Products)
                 {
                     Console.WriteLine($"{product.Id}: {product.Name} - {product.Price} kr");
                 }
@@ -552,17 +537,16 @@ namespace Webshop
                 Console.Write("Ange ID för produkten du vill ta bort: ");
                 int productId = int.Parse(Console.ReadLine() ?? "0");
 
-                var productToDelete = context.Products.Find(productId);
+                var productToDelete = dbContext.Products.Find(productId);
                 if (productToDelete == null)
                 {
                     Console.WriteLine("Produkten med det angivna ID:t hittades inte.");
                     return;
                 }
 
-                context.Products.Remove(productToDelete);
-                context.SaveChanges();
-                Console.WriteLine($"Produkten '{productToDelete.Name}' har tagits bort.");
-            }
+            dbContext.Products.Remove(productToDelete);
+            dbContext.SaveChanges();
+            Console.WriteLine($"Produkten '{productToDelete.Name}' har tagits bort.");
         }
     }
 }

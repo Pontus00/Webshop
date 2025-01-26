@@ -10,10 +10,13 @@ namespace Webshop
     internal class CustomerManager
     {
         private MyDbContext dbContext;
+        private Order currentOrder;
 
         public CustomerManager()
         {
             dbContext = new MyDbContext();
+            currentOrder = new Order();
+            currentOrder.Items = new List<OrderItem>();
         }
 
         public void ShowCustomerPage()
@@ -147,7 +150,7 @@ namespace Webshop
     
         private void AddProductToCart(int productId, int amount = 1)
         {
-                var orderItem = dbContext.OrderItems.FirstOrDefault(oi => oi.ProductId == productId);
+                var orderItem = currentOrder.Items?.FirstOrDefault(oi => oi.ProductId == productId);
                 if (orderItem != null)
                 {
                     orderItem.Amount += amount;
@@ -159,9 +162,8 @@ namespace Webshop
                         ProductId = productId,
                         Amount = amount
                     };
-                dbContext.OrderItems.Add(orderItem);
+                currentOrder.Items?.Add(orderItem);
                 }
-            dbContext.SaveChanges();
             }
         
         private void ShowCart()
@@ -170,15 +172,15 @@ namespace Webshop
             {
                 Console.Clear();
                 Console.WriteLine("\nKundvagn:");
-                var cartItems = dbContext.OrderItems.ToList();
+                var cartItems = currentOrder.Items?.ToList();
 
-                if (!cartItems.Any())
+                if (cartItems?.Count == 0)
                 {
                     Console.WriteLine("Kundvagnen är tom.");
                     break;
                 }
 
-                for (int i = 0; i < cartItems.Count; i++)
+                for (int i = 0; i < cartItems?.Count; i++)
                 {
                     var item = cartItems[i];
                     var product = dbContext.Products.FirstOrDefault(p => p.Id == item.ProductId);
@@ -190,7 +192,7 @@ namespace Webshop
 
                 Console.WriteLine("\nAnge numret på produkten du vill ta bort, 'A' för att lägga till en produkt, 'O' för att skapa en order eller 0 för att gå tillbaka:");
                 var input = Console.ReadLine();
-                if (int.TryParse(input, out int choice) && choice > 0 && choice <= cartItems.Count)
+                if (int.TryParse(input, out int choice) && choice > 0 && choice <= cartItems?.Count)
                 {
                     RemoveProductFromCart(cartItems[choice - 1].Id);
                     Console.WriteLine("Produkten har tagits bort från kundvagnen.");
@@ -292,8 +294,8 @@ namespace Webshop
 
         private Order CreateOrder(int customerId, PaymentMethod paymentMethod, ShippingMethod shippingMethod, decimal shippingPrice, decimal vat, decimal totalPrice)
         {
-            var cartItems = dbContext.OrderItems.ToList();
-            if (!cartItems.Any())
+            var cartItems = currentOrder.Items?.ToList();
+            if (cartItems?.Count == 0)
             {
                 Console.WriteLine("Kundvagnen är tom. Kan inte skapa en order.");
                 return null;
@@ -308,21 +310,20 @@ namespace Webshop
                 ShippingPrice = shippingPrice,
                 VAT = vat,
                 TotalPrice = totalPrice,
-                Items = new List<OrderItem>()
+                Items = cartItems
             };
 
-            foreach (var item in cartItems)
-            {
-                item.OrderId = order.Id;
-                order.Items.Add(item);
-            }
+            //foreach (var item in cartItems)
+            //{
+            //    item.OrderId = order.Id;
+            //    order.Items.Add(item);
+            //}
 
             dbContext.Orders.Add(order);
             dbContext.SaveChanges();
 
             // Rensa kundvagnen
-            dbContext.OrderItems.RemoveRange(cartItems);
-            dbContext.SaveChanges();
+            currentOrder.Items?.Clear();
 
             Console.WriteLine("Ordern har skapats.");
             return order;
@@ -360,17 +361,12 @@ namespace Webshop
 
         private void RemoveProductFromCart(int orderItemId)
         {
-            using (var context = new MyDbContext())
-            {
-                var orderItem = context.OrderItems.FirstOrDefault(oi => oi.Id == orderItemId);
+                var orderItem = currentOrder.Items?.FirstOrDefault(oi => oi.Id == orderItemId);
                 if (orderItem != null)
                 {
-                    context.OrderItems.Remove(orderItem);
-                    context.SaveChanges();
+                    currentOrder.Items?.Remove(orderItem);
                 }
-            }
         }
-
         private void DisplayChosenProducts(List<Product> products)
         {
             var productBoxes = products.Select(p =>
