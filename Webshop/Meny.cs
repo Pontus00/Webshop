@@ -18,25 +18,23 @@ namespace Webshop
 
         public void ShowCustomerPage()
         {
-            using (var context = new MyDbContext())
-            {
                 while (true)
                 {
                     Console.Clear();
                     Console.WriteLine("\nVälkommen till kundsidan!");
 
                     // Hämta och visa utvalda produkter
-                    ShowChosenProducts(context);
+                    ShowChosenProducts();
 
                     // Visa och hantera kategorier
-                    ShowCategoriesAndHandleSelection(context);
+                    ShowCategoriesAndHandleSelection();
 
                     // Visa alternativ för att se kundvagnen
                     Console.WriteLine("\nTryck 'K' för att se din kundvagn eller 'Q' för att avsluta.");
                     var input = Console.ReadKey();
                     if (input.Key == ConsoleKey.K)
                     {
-                        ShowCart(context);
+                        ShowCart();
                     }
                     else if (input.Key == ConsoleKey.Q)
                     {
@@ -44,12 +42,12 @@ namespace Webshop
                     }
                 }
             }
-        }
+       
 
-        private void ShowChosenProducts(MyDbContext context)
+        private void ShowChosenProducts()
         {
             Console.WriteLine("\nUtvalda produkter:");
-            var chosenProducts = context.Products.Where(p => p.IsChosen).Take(3).ToList();
+            var chosenProducts = dbContext.Products.Where(p => p.IsChosen).Take(3).ToList();
 
             if (chosenProducts.Any())
             {
@@ -61,10 +59,10 @@ namespace Webshop
             }
         }
 
-        private void ShowCategoriesAndHandleSelection(MyDbContext context)
+        private void ShowCategoriesAndHandleSelection()
         {
             Console.WriteLine("\nTillgängliga kategorier:");
-            var categories = context.Categories.ToList();
+            var categories = dbContext.Categories.ToList();
 
             if (!categories.Any())
             {
@@ -81,7 +79,7 @@ namespace Webshop
             if (int.TryParse(Console.ReadLine(), out int categoryChoice) && categoryChoice > 0 && categoryChoice <= categories.Count)
             {
                 var selectedCategory = categories[categoryChoice - 1];
-                ShowProductsInCategory(context, selectedCategory.Id);
+                ShowProductsInCategory(selectedCategory.Id);
             }
             else
             {
@@ -90,10 +88,10 @@ namespace Webshop
 
         }
 
-        private void ShowProductsInCategory(MyDbContext context, int categoryId)
+        private void ShowProductsInCategory(int categoryId)
         {
             Console.Clear();
-            var products = context.Products.Where(p => p.CategoryId == categoryId).ToList();
+            var products = dbContext.Products.Where(p => p.CategoryId == categoryId).ToList();
 
             if (!products.Any())
             {
@@ -120,12 +118,10 @@ namespace Webshop
 
         private void ShowProductDetails(Product product)
         {
-            using (var context = new MyDbContext())
-            {
                 Console.Clear();
 
                 // Hämta leverantörsnamn baserat på SupplierId
-                var supplier = context.Suppliers.FirstOrDefault(s => s.Id == product.SupplierId);
+                var supplier = dbContext.Suppliers.FirstOrDefault(s => s.Id == product.SupplierId);
                 string supplierName = supplier?.Name ?? "Okänd leverantör";
 
                 // Visa produktdetaljer
@@ -148,13 +144,10 @@ namespace Webshop
                 Console.WriteLine("\nTryck på valfri tangent för att gå tillbaka.");
                 Console.ReadKey();
             }
-        }
-
+    
         private void AddProductToCart(int productId, int amount = 1)
         {
-            using (var context = new MyDbContext())
-            {
-                var orderItem = context.OrderItems.FirstOrDefault(oi => oi.ProductId == productId);
+                var orderItem = dbContext.OrderItems.FirstOrDefault(oi => oi.ProductId == productId);
                 if (orderItem != null)
                 {
                     orderItem.Amount += amount;
@@ -166,19 +159,18 @@ namespace Webshop
                         ProductId = productId,
                         Amount = amount
                     };
-                    context.OrderItems.Add(orderItem);
+                dbContext.OrderItems.Add(orderItem);
                 }
-                context.SaveChanges();
+            dbContext.SaveChanges();
             }
-        }
-
-        private void ShowCart(MyDbContext context)
+        
+        private void ShowCart()
         {
             while (true)
             {
                 Console.Clear();
                 Console.WriteLine("\nKundvagn:");
-                var cartItems = context.OrderItems.ToList();
+                var cartItems = dbContext.OrderItems.ToList();
 
                 if (!cartItems.Any())
                 {
@@ -189,7 +181,7 @@ namespace Webshop
                 for (int i = 0; i < cartItems.Count; i++)
                 {
                     var item = cartItems[i];
-                    var product = context.Products.FirstOrDefault(p => p.Id == item.ProductId);
+                    var product = dbContext.Products.FirstOrDefault(p => p.Id == item.ProductId);
                     if (product != null)
                     {
                         Console.WriteLine($"{i + 1}. Produkt: {product.Name}, Antal: {item.Amount}, Pris: {product.Price} kr");
@@ -226,7 +218,7 @@ namespace Webshop
                 }
                 else if (input?.ToLower() == "o")
                 {
-                    Checkout(context);
+                    Checkout();
                     break;
                 }
                 else if (choice == 0)
@@ -243,13 +235,13 @@ namespace Webshop
             Console.ReadKey();
         }
 
-        private void Checkout(MyDbContext context)
+        private void Checkout()
         {
             Console.Clear();
             Console.WriteLine("\nUtcheckning:");
 
             // Skapa ny kund
-            var customer = CreateCustomer(context);
+            var customer = CreateCustomer();
 
             Console.Write("Ange betalningsmetod (1: Kreditkort, 2: PayPal, 3: Faktura): ");
             PaymentMethod paymentMethod = (PaymentMethod)int.Parse(Console.ReadLine());
@@ -266,11 +258,11 @@ namespace Webshop
             Console.Write("Ange totalpris: ");
             decimal totalPrice = decimal.Parse(Console.ReadLine());
 
-            var order = CreateOrder(context, customer.Id, paymentMethod, shippingMethod, shippingPrice, vat, totalPrice);
+            var order = CreateOrder(customer.Id, paymentMethod, shippingMethod, shippingPrice, vat, totalPrice);
             ShowOrderDetails(order);
         }
 
-        private Customer CreateCustomer(MyDbContext context)
+        private Customer CreateCustomer()
         {
             Console.Write("Ange kundens namn: ");
             string name = Console.ReadLine();
@@ -292,15 +284,15 @@ namespace Webshop
                 Email = email
             };
 
-            context.Customers.Add(customer);
-            context.SaveChanges();
+            dbContext.Customers.Add(customer);
+            dbContext.SaveChanges();
 
             return customer;
         }
 
-        private Order CreateOrder(MyDbContext context, int customerId, PaymentMethod paymentMethod, ShippingMethod shippingMethod, decimal shippingPrice, decimal vat, decimal totalPrice)
+        private Order CreateOrder(int customerId, PaymentMethod paymentMethod, ShippingMethod shippingMethod, decimal shippingPrice, decimal vat, decimal totalPrice)
         {
-            var cartItems = context.OrderItems.ToList();
+            var cartItems = dbContext.OrderItems.ToList();
             if (!cartItems.Any())
             {
                 Console.WriteLine("Kundvagnen är tom. Kan inte skapa en order.");
@@ -325,12 +317,12 @@ namespace Webshop
                 order.Items.Add(item);
             }
 
-            context.Orders.Add(order);
-            context.SaveChanges();
+            dbContext.Orders.Add(order);
+            dbContext.SaveChanges();
 
             // Rensa kundvagnen
-            context.OrderItems.RemoveRange(cartItems);
-            context.SaveChanges();
+            dbContext.OrderItems.RemoveRange(cartItems);
+            dbContext.SaveChanges();
 
             Console.WriteLine("Ordern har skapats.");
             return order;
