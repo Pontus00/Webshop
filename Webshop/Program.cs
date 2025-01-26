@@ -7,13 +7,16 @@ namespace Webshop
     {
         static void Main(string[] args)
         {
+            var admin = new Admin();
+          
             var productManager = new ProductManager(); // Hanterar admin-funktioner
             var customerManager = new CustomerManager(); // Hanterar kundfunktioner
+            
+
 
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("Välkommen till Webshop!");
                 Console.WriteLine("Välj roll:");
                 Console.WriteLine("1. Kund");
                 Console.WriteLine("2. Admin");
@@ -27,7 +30,7 @@ namespace Webshop
                         customerManager.ShowCustomerPage(); // Öppnar kundsidan
                         break;
                     case "2":
-                        ShowAdminMenu(productManager); // Öppnar adminmenyn
+                        admin.ShowAdminPage();  // Öppnar adminmenyn
                         break;
                     case "3":
                         Console.WriteLine("Tack för besöket! Programmet avslutas.");
