@@ -24,7 +24,7 @@ namespace Webshop
             currentOrder.Items = new List<OrderItem>();
         }
 
-        public void ShowCustomerPage()
+        public async Task ShowCustomerPage()
         {
             while (true)
             {
@@ -32,35 +32,20 @@ namespace Webshop
                 Console.WriteLine("\nVälkommen till kundsidan!");
 
                 // Hämta och visa utvalda produkter
-                ShowChosenProducts();
+                await ShowChosenProducts();
 
                 // Visa och hantera kategorier
-                ShowCategoriesAndHandleSelection();
+                await ShowCategoriesAndHandleSelection();
 
-                // Visa alternativ för att se kundvagnen eller söka efter produkter
-                //Console.WriteLine("\nTryck 'K' för att se din kundvagn, 'S' för att söka efter produkter eller 'Q' för att avsluta.");
-                //var input = Console.ReadKey();
-                //if (input.Key == ConsoleKey.K)
-                //{
-                //    ShowCart();
-                //}
-                //else if (input.Key == ConsoleKey.S)
-                //{
-                //    SearchProducts();
-                //}
-                //else if (input.Key == ConsoleKey.Q)
-                //{
-                //    break;
-                //}
 
             }
         }
 
 
-        private void ShowChosenProducts()
+        private async Task ShowChosenProducts()
         {
             Console.WriteLine("\nUtvalda produkter:");
-            var chosenProducts = dbContext.Products.Where(p => p.IsChosen).Take(3).ToList();
+            var chosenProducts = await dbContext.Products.Where(p => p.IsChosen).Take(3).ToListAsync();
 
             if (chosenProducts.Any())
             {
@@ -72,10 +57,10 @@ namespace Webshop
             }
         }
 
-        private void ShowCategoriesAndHandleSelection()
+        private async Task ShowCategoriesAndHandleSelection()
         {
-            Console.WriteLine("\nTillgängliga kategorier:");
-            var categories = dbContext.Categories.ToList();
+            Console.WriteLine("Tillgängliga kategorier:");
+            var categories = await dbContext.Categories.ToListAsync();
 
             if (!categories.Any())
             {
@@ -88,8 +73,12 @@ namespace Webshop
                 Console.WriteLine($"{i + 1}. {categories[i].Name}");
             }
 
-            Console.Write("\nVälj en kategori (ange siffra eller 0 för att gå tillbaka).");
-            Console.Write("\nTryck 'K' för att visa Kundvagnen eller 'S' för att söka på en produkt eller tryck 'B' för att se bäst säljande vara, 'L' för att se minst lager eller 'P' för att se populäraste kategorin: ");
+            Console.WriteLine("Välj en kategori (ange siffra eller 0 för att gå tillbaka).");
+            Console.WriteLine("Tryck 'K' för att visa Kundvagnen");
+            Console.WriteLine("'S' för att söka på en produkt");
+            Console.WriteLine("'L' för att se produkter som snart är slut i lager");
+            Console.WriteLine("'B' för att se bäst säljande vara");
+            Console.WriteLine("'P' för att se populäraste kategorin:");
             var input = Console.ReadLine();
 
             if (int.TryParse(input, out int categoryChoice) && categoryChoice > 0 && categoryChoice <= categories.Count)
@@ -237,7 +226,7 @@ namespace Webshop
                     Console.WriteLine($"Summa: {Math.Round(totalPrice, 2)} kr");
                 }
 
-                Console.WriteLine("\nAnge numret på produkten du vill ta bort, 'A' för att lägga till en produkt, 'Ä' för att ändra antal, 'O' för att skapa en order eller 0 för att gå tillbaka:");
+                Console.WriteLine("\nAnge numret på produkten du vill ta bort, 'Ä' för att ändra antal, 'O' för att skapa en order eller 0 för att gå tillbaka:");
                 var input = Console.ReadLine();
                 if (int.TryParse(input, out int choice) && choice > 0 && choice <= cartItems?.Count)
                 {

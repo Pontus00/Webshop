@@ -5,7 +5,7 @@ namespace Webshop
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             var admin = new Admin();
           
@@ -27,7 +27,7 @@ namespace Webshop
                 switch (choice)
                 {
                     case "1":
-                        customerManager.ShowCustomerPage(); // Öppnar kundsidan
+                        await customerManager.ShowCustomerPage(); // Öppnar kundsidan
                         break;
                     case "2":
                         admin.ShowAdminPage();  // Öppnar adminmenyn
