@@ -37,7 +37,8 @@ namespace Webshop.Models
     }
     public enum AddressType
     {
-        Delivery = 1,
-        Invoice = 2
+        Customer = 1,
+        Delivery = 2,
+        Invoice = 3
     }
 }
