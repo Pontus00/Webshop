@@ -27,15 +27,15 @@ namespace Webshop.Models
     public enum PaymentMethod
     {
         Invoice = 0,
-        CreditCard = 1,
+        Kreditkort = 3,
         PayPal = 2,
-        Swish = 3
+        Swish = 1
     }
     
     public enum ShippingMethod
     {
-        Budget = 1,
-        Standard = 2,
-        Express = 3,
+        Budget = 0,
+        Standard = 1,
+        Express = 2,
     }
 }

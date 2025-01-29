@@ -304,13 +304,13 @@ namespace Webshop
             // Skapa ny kund
             var customer = CreateCustomer();
 
-            Console.Write("Ange betalningsmetod (1: Kreditkort, 2: PayPal, 3: Faktura): ");
-            PaymentMethod paymentMethod = (PaymentMethod)int.Parse(Console.ReadLine());
+            Console.Write("Ange betalningsmetod (1:Swish , 2: PayPal, 3: Kreditkort): ");
+            PaymentMethod paymentMethod = (PaymentMethod)(int.Parse(Console.ReadLine()));
 
             Console.Write("Ange fraktmetod (1: Standard, 2: Express): ");
-            ShippingMethod shippingMethod = (ShippingMethod)int.Parse(Console.ReadLine());
+            ShippingMethod shippingMethod = (ShippingMethod)(int.Parse(Console.ReadLine()));
 
-            decimal shippingPrice = shippingMethod == ShippingMethod.Budget ? 0 : 50;
+            decimal shippingPrice = shippingMethod == ShippingMethod.Standard ? 0 : 50;
 
             decimal totalPrice = shippingPrice;
             foreach (var item in currentOrder.Items)
@@ -357,8 +357,8 @@ namespace Webshop
             );
 
             Console.WriteLine("Vill du ange en annan leveransadress? (J/N)");
-            var answer = Console.ReadKey();
-            if (answer.Key == ConsoleKey.J)
+            var answer = Console.ReadLine();
+            if (answer.ToLower() == "j")
             {
                 Console.Write("Ange adress: ");
                 string deliverystreet = Console.ReadLine();
@@ -384,10 +384,10 @@ namespace Webshop
             int birthYear = int.Parse(Console.ReadLine());
             int age = DateTime.Now.Year - birthYear;
 
-            Console.Write("Ange kundens telefonnummer: ");
+            Console.Write("Ange telefonnummer: ");
             string phone = Console.ReadLine();
 
-            Console.Write("Ange kundens e-postadress: ");
+            Console.Write("Ange e-postadress: ");
             string email = Console.ReadLine();
 
 
