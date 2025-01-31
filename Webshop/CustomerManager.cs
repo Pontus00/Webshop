@@ -29,7 +29,7 @@ namespace Webshop
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("\nVälkommen till kundsidan!");
+                Console.WriteLine("Välkommen till Kurts klädbutik!");
 
                 // Hämta och visa utvalda produkter
                 await ShowChosenProducts();
@@ -44,7 +44,7 @@ namespace Webshop
 
         private async Task ShowChosenProducts()
         {
-            Console.WriteLine("\nUtvalda produkter:");
+            Console.WriteLine("Utvalda produkter:");
             var chosenProducts = await dbContext.Products.Where(p => p.IsChosen).Take(3).ToListAsync();
 
             if (chosenProducts.Any())
@@ -167,7 +167,7 @@ namespace Webshop
                 Console.WriteLine("Produkten har lagts till i kundvagnen.");
             }
 
-            Console.WriteLine("\nTryck på valfri tangent för att gå tillbaka.");
+            Console.WriteLine("Tryck på valfri tangent för att gå tillbaka.");
             Console.ReadKey();
         }
 
@@ -202,7 +202,7 @@ namespace Webshop
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine("\nKundvagn:");
+                Console.WriteLine("Kundvagn:");
                 var cartItems = currentOrder.Items?.ToList();
 
                 if (cartItems?.Count == 0)
@@ -226,7 +226,7 @@ namespace Webshop
                     Console.WriteLine($"Summa: {Math.Round(totalPrice, 2)} kr");
                 }
 
-                Console.WriteLine("\nAnge numret på produkten du vill ta bort, 'Ä' för att ändra antal, 'O' för att skapa en order eller 0 för att gå tillbaka:");
+                Console.WriteLine("Ange numret på produkten du vill ta bort, 'Ä' för att ändra antal, 'O' för att skapa en order eller 0 för att gå tillbaka:");
                 var input = Console.ReadLine();
                 if (int.TryParse(input, out int choice) && choice > 0 && choice <= cartItems?.Count)
                 {
@@ -292,14 +292,14 @@ namespace Webshop
                 }
             }
 
-            Console.WriteLine("\nTryck på valfri tangent för att gå tillbaka.");
+            Console.WriteLine("Tryck på valfri tangent för att gå tillbaka.");
             Console.ReadKey();
         }
 
         private void Checkout()
         {
             Console.Clear();
-            Console.WriteLine("\nUtcheckning:");
+            Console.WriteLine("Utcheckning:");
 
             // Skapa ny kund
             var customer = CreateCustomer();
@@ -452,14 +452,14 @@ namespace Webshop
             Console.WriteLine($"Moms: {order.VAT} kr");
             Console.WriteLine($"Totalpris: {order.TotalPrice} kr");
 
-            Console.WriteLine("\nOrderrader:");
+            Console.WriteLine("Orderrader:");
             foreach (var item in order.Items)
             {
                 var product = item.Product;
                 Console.WriteLine($"Produkt-ID: {item.ProductId}, Namn: {product?.Name}, Antal: {item.Amount}, Pris: {product?.Price} kr");
             }
 
-            Console.WriteLine("\nTryck på valfri tangent för att gå tillbaka.");
+            Console.WriteLine("Tryck på valfri tangent för att gå tillbaka.");
             Console.ReadKey();
         }
 
@@ -511,7 +511,7 @@ namespace Webshop
                 return;
             }
 
-            Console.WriteLine("\nSökresultat:");
+            Console.WriteLine("Sökresultat:");
             for (int i = 0; i < searchResults.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. {searchResults[i].Name}");
@@ -532,7 +532,7 @@ namespace Webshop
             using (var connection = new SqlConnection(connectionString))
             {
                 string query = @"
-                SELECT TOP 5 p.Id, p.Name, SUM(oi.Amount) AS TotalSold
+                SELECT TOP 1 p.Id, p.Name, SUM(oi.Amount) AS TotalSold
                 FROM Products p
                 JOIN OrderItems oi ON p.Id = oi.ProductId
                 GROUP BY p.Id, p.Name
@@ -560,7 +560,7 @@ namespace Webshop
             using (var connection = new SqlConnection(connectionString))
             {
                 string query = @"
-        SELECT TOP 5 c.Id, c.Name, COUNT(oi.ProductId) AS TotalSold
+        SELECT TOP 1 c.Id, c.Name, COUNT(oi.ProductId) AS TotalSold
         FROM Categories c
         JOIN Products p ON c.Id = p.CategoryId
         JOIN OrderItems oi ON p.Id = oi.ProductId

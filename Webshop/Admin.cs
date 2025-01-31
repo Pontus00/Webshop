@@ -291,7 +291,7 @@ namespace Webshop
                     Console.WriteLine("Ogiltigt val. Försök igen.");
                 }
 
-                Console.WriteLine("\nTryck på valfri tangent för att fortsätta.");
+                Console.WriteLine("Tryck på valfri tangent för att fortsätta.");
                 Console.ReadKey();
             }
         }
@@ -305,7 +305,7 @@ namespace Webshop
                 return;
             }
 
-            Console.WriteLine("\nKunder:");
+            Console.WriteLine("Kunder:");
             foreach (var customer in customers)
             {
                 Console.WriteLine($"Kund-ID: {customer.Id}, Namn: {customer.Name}, E-post: {customer.Email}");
@@ -331,7 +331,7 @@ namespace Webshop
                 return;
             }
 
-            Console.WriteLine($"\nOrders för kund: {customer.Name}");
+            Console.WriteLine($"Orders för kund: {customer.Name}");
             foreach (var order in orders)
             {
                 ShowOrderDetails(order);
@@ -340,7 +340,7 @@ namespace Webshop
 
         private void ShowOrderDetails(Order order)
         {
-            Console.WriteLine("\nOrderdetaljer:");
+            Console.WriteLine("Orderdetaljer:");
             Console.WriteLine($"Order-ID: {order.Id}");
             Console.WriteLine($"Orderdatum: {order.OrderDate}");
             Console.WriteLine($"Betalningsmetod: {order.PaymentMethod}");
@@ -349,7 +349,7 @@ namespace Webshop
             Console.WriteLine($"Moms: {order.VAT} kr");
             Console.WriteLine($"Totalpris: {order.TotalPrice} kr");
 
-            Console.WriteLine("\nOrderrader:");
+            Console.WriteLine("Orderrader:");
             foreach (var item in order.Items)
             {
                 var product = dbContext.Products.Find(item.ProductId);
@@ -668,7 +668,7 @@ namespace Webshop
                 Console.WriteLine("Ogiltigt kund-ID.");
             }
 
-            Console.WriteLine("\nTryck på valfri tangent för att gå tillbaka.");
+            Console.WriteLine("Tryck på valfri tangent för att gå tillbaka.");
             Console.ReadKey();
         }
     }
